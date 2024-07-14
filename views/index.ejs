@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tracker</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Books I've Read</h1>
+    <button onclick="openModal()">Add New Book</button>
+    <ul>
+        <% books.forEach(book => { %>
+            <li id="book-<%= book.id %>">
+                <img src="<%= book.image %>" alt="<%= book.title %>">
+                <strong><%= book.title %></strong> by <%= book.author %>
+                <p>Rating: <%= book.ratings %></p>
+                <form onsubmit="event.preventDefault(); deleteBook(<%= book.id %>);">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        <% }); %>
+    </ul>
+    <div id="modal" style="display:none;">
+        <form action="/search" method="POST">
+            <input type="text" name="query" placeholder="Search for a book">
+            <button type="submit">Search</button>
+        </form>
+        <div id="search-results"></div>
+    </div>
+    <script>
+        function openModal() {
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        async function deleteBook(bookId) {
+            try {
+                const response = await fetch('/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: bookId })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById(`book-${bookId}`).remove();
+                } else {
+                    alert('Failed to delete book');
+                }
+            } catch (error) {
+                console.error('Error deleting book:', error);
+                alert('Error deleting book');
+            }
+        }
+    </script>
+</body>
+</html>
